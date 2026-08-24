@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Аромапомощь по эмоциям</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#F3F1E9; --paper:#FBFAF5; --paper-2:#F6F4EC;
+  --ink:#26302A; --muted:#6C7268; --hair:#E4E1D5;
+  --accent:#4C7A52; --accent-deep:#3B6241; --accent-soft:#E5EDDE; --accent-ink:#2E4A34;
+  --gold:#A98A54;
+  --shadow:0 1px 2px rgba(38,48,42,.05),0 8px 30px rgba(38,48,42,.07);
+  --shadow-lg:0 10px 50px rgba(38,48,42,.16);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#12150F; --paper:#1B1F17; --paper-2:#20241B;
+    --ink:#ECEBE0; --muted:#9AA08D; --hair:#2E3327;
+    --accent:#93B98B; --accent-deep:#A9CCA0; --accent-soft:#26301F; --accent-ink:#C9DDBF;
+    --gold:#C7A66A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 30px rgba(0,0,0,.35);
+    --shadow-lg:0 10px 50px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#12150F; --paper:#1B1F17; --paper-2:#20241B;
+  --ink:#ECEBE0; --muted:#9AA08D; --hair:#2E3327;
+  --accent:#93B98B; --accent-deep:#A9CCA0; --accent-soft:#26301F; --accent-ink:#C9DDBF;
+  --gold:#C7A66A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 30px rgba(0,0,0,.35);
+  --shadow-lg:0 10px 50px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--ground); color:var(--ink);
+  font-family:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; min-height:100dvh;
+}
+.wrap{max-width:520px; margin:0 auto; min-height:100dvh; background:var(--paper);
+  box-shadow:var(--shadow-lg); position:relative; padding-bottom:100px;}
+@media(min-width:560px){.wrap{margin:22px auto; min-height:auto; border-radius:26px; overflow:hidden;}}
+.head{padding:30px 22px 18px; text-align:center; position:relative;
+  background:radial-gradient(120% 90% at 50% -10%, var(--accent-soft) 0%, transparent 60%);}
+.leaf{width:40px;height:40px;margin:0 auto 8px;display:block;color:var(--accent)}
+.head h1{font-family:"Cormorant Garamond",Georgia,serif; font-weight:600;
+  font-size:30px; line-height:1.05; margin:0; letter-spacing:.2px; text-wrap:balance;}
+.head p{margin:6px 0 0; color:var(--muted); font-size:13.5px; letter-spacing:.2px}
+.theme-btn{position:absolute; top:18px; right:16px; width:38px;height:38px;border-radius:50%;
+  border:1px solid var(--hair); background:var(--paper); color:var(--ink); cursor:pointer;
+  display:grid;place-items:center; font-size:16px; box-shadow:var(--shadow);}
+.theme-btn:hover{border-color:var(--accent)}
+.tabs{display:flex; gap:6px; padding:6px; margin:4px 18px 0; background:var(--paper-2);
+  border:1px solid var(--hair); border-radius:999px;}
+.tab{flex:1; border:0; background:transparent; color:var(--muted); font:inherit; font-weight:600;
+  font-size:14px; padding:10px 8px; border-radius:999px; cursor:pointer; letter-spacing:.2px;}
+.tab[aria-selected="true"]{background:var(--accent); color:#fff; box-shadow:var(--shadow)}
+:root[data-theme="dark"] .tab[aria-selected="true"],
+:root:not([data-theme="light"]) .tab[aria-selected="true"]{color:#10140D}
+.panel{padding:18px}
+.hidden{display:none}
+.search{position:relative}
+.search svg{position:absolute; left:16px; top:50%; transform:translateY(-50%); color:var(--muted); width:19px;height:19px}
+#q,#qc{width:100%; padding:15px 16px 15px 44px; font:inherit; font-size:16px; color:var(--ink);
+  background:var(--paper-2); border:1.5px solid var(--hair); border-radius:14px; outline:none;}
+#q:focus,#qc:focus{border-color:var(--accent); background:var(--paper)}
+#q::placeholder,#qc::placeholder{color:var(--muted)}
+.hint{margin:12px 2px 4px; color:var(--muted); font-size:12.5px; letter-spacing:.3px; text-transform:uppercase; font-weight:600}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+.seed{border:1px solid var(--hair); background:var(--paper); color:var(--accent-ink); font:inherit;
+  font-size:13.5px; font-weight:600; padding:7px 13px; border-radius:999px; cursor:pointer}
+.seed:hover{border-color:var(--accent); background:var(--accent-soft)}
+.results{margin-top:16px; display:flex; flex-direction:column; gap:12px}
+.reldiv{margin:10px 2px 0; padding-top:14px; border-top:1px dashed var(--hair); color:var(--gold);
+  font-size:12px; letter-spacing:.6px; text-transform:uppercase; font-weight:700}
+.rcard{background:var(--paper); border:1px solid var(--hair); border-radius:18px; padding:16px 16px 14px; box-shadow:var(--shadow)}
+.rcard .emo{font-family:"Cormorant Garamond",Georgia,serif; font-weight:600; font-size:22px; line-height:1.1; color:var(--ink)}
+.rcard .lead{font-size:12.5px; color:var(--muted); margin:2px 0 11px}
+.oils{display:flex; flex-wrap:wrap; gap:7px}
+.oil{display:inline-flex; align-items:center; gap:7px; border:1px solid var(--accent-soft); background:var(--accent-soft); color:var(--accent-ink);
+  font:inherit; font-size:13.5px; font-weight:600; padding:6px 12px 6px 7px; border-radius:10px; cursor:pointer; text-align:left}
+.oil:hover{border-color:var(--accent)}
+.oil.noimg{padding-left:12px}
+.oil .n{opacity:.55; font-weight:700; font-variant-numeric:tabular-nums}
+.oil .th{width:26px;height:26px;border-radius:7px;object-fit:cover;background:#fff;flex:0 0 26px}
+.empty{text-align:center; color:var(--muted); padding:34px 10px; font-size:14.5px}
+.empty b{color:var(--ink)}
+.catbar{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px}
+.count{color:var(--muted); font-size:12.5px; font-weight:600; letter-spacing:.3px; text-transform:uppercase}
+.catgrid{display:grid; grid-template-columns:1fr 1fr; gap:9px}
+@media(max-width:400px){.catgrid{grid-template-columns:1fr}}
+.catitem{display:flex; align-items:center; gap:11px; border:1px solid var(--hair); background:var(--paper); color:var(--ink); font:inherit;
+  text-align:left; padding:11px 13px; border-radius:14px; cursor:pointer; box-shadow:var(--shadow)}
+.catitem:hover{border-color:var(--accent)}
+.catitem .cth{width:42px;height:42px;border-radius:11px;object-fit:cover;background:#fff;flex:0 0 42px}
+.catitem .cph{width:42px;height:42px;border-radius:11px;background:var(--accent-soft);color:var(--accent);flex:0 0 42px;display:grid;place-items:center}
+.catitem .cph svg{width:22px;height:22px}
+.catitem .cn{font-weight:600; font-size:15px}
+.catitem .cc{color:var(--muted); font-size:12px; margin-top:2px}
+.scrim{position:fixed; inset:0; background:rgba(20,26,20,.5); backdrop-filter:blur(3px);
+  opacity:0; pointer-events:none; transition:opacity .25s; z-index:40}
+.scrim.on{opacity:1; pointer-events:auto}
+.sheet{position:fixed; left:50%; bottom:0; transform:translate(-50%,102%);
+  width:min(520px,100%); max-height:88dvh; overflow-y:auto; background:var(--paper);
+  border-radius:24px 24px 0 0; box-shadow:var(--shadow-lg); z-index:50; transition:transform .32s cubic-bezier(.22,1,.36,1);
+  padding:8px 22px 30px;}
+.sheet.on{transform:translate(-50%,0)}
+@media(min-width:560px){.sheet{bottom:auto; top:50%; transform:translate(-50%,-46%) scale(.98); opacity:0; border-radius:24px; max-height:86vh}
+  .sheet.on{transform:translate(-50%,-50%) scale(1); opacity:1}}
+.grab{width:40px;height:4px;border-radius:99px;background:var(--hair);margin:8px auto 4px}
+@media(min-width:560px){.grab{display:none}}
+.sh-close{position:absolute; top:16px; right:16px; width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--hair); background:var(--paper); color:var(--ink); cursor:pointer; font-size:16px; z-index:2}
+.sh-hero{display:flex; align-items:center; gap:16px; margin:14px 0 2px}
+.sh-hero .pic{width:76px;height:76px;border-radius:50%;object-fit:cover;background:#fff;border:3px solid var(--paper);box-shadow:var(--shadow);flex:0 0 76px}
+.sh-hero .picph{width:76px;height:76px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:0 0 76px}
+.sh-hero .picph svg{width:38px;height:38px}
+.sh-key{color:var(--gold); font-size:12px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; margin:0 0 2px}
+.sh-name{font-family:"Cormorant Garamond",Georgia,serif; font-weight:600; font-size:30px; line-height:1.02; margin:0; text-wrap:balance}
+.sh-sub{color:var(--muted); font-size:13px; margin:5px 0 16px}
+.block{border-top:1px solid var(--hair); padding:15px 0 4px}
+.block h3{font-size:12px; letter-spacing:.6px; text-transform:uppercase; color:var(--accent); margin:0 0 10px; font-weight:700}
+.tag{display:inline-flex; align-items:center; border:1px solid var(--hair); background:var(--paper-2);
+  color:var(--ink); font-size:13.5px; padding:6px 11px; border-radius:9px; margin:0 6px 6px 0; cursor:pointer}
+.tag:hover{border-color:var(--accent)}
+.how{display:flex; gap:12px; align-items:flex-start; margin:0 0 12px}
+.how .ic{flex:0 0 34px; width:34px;height:34px;border-radius:10px; background:var(--accent-soft); color:var(--accent-ink); display:grid;place-items:center}
+.how .ic svg{width:18px;height:18px}
+.how b{display:block; font-size:14px; margin-bottom:2px}
+.how span{color:var(--muted); font-size:13.5px}
+.note{background:var(--accent-soft); color:var(--accent-ink); border-radius:12px; padding:12px 14px; font-size:13px; line-height:1.5; margin-top:6px}
+.disc{margin:22px 18px 6px; color:var(--muted); font-size:11.5px; line-height:1.55; text-align:center}
+.disc b{color:var(--ink)}
+.brand{text-align:center; color:var(--muted); font-size:12px; padding:6px 0 22px; letter-spacing:.3px}
+.brand b{color:var(--accent-ink); font-weight:700}
+.loader{min-height:70dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--muted);text-align:center;padding:30px}
+.loader .leaf{width:46px;height:46px;color:var(--accent);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4;transform:scale(.96)}50%{opacity:1;transform:scale(1)}}
+.retry{margin-top:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;font:inherit;font-weight:600;padding:11px 22px;border-radius:12px;cursor:pointer}
+:root[data-theme="dark"] .retry,:root:not([data-theme="light"]) .retry{color:#10140D}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="loader" id="loader">
+    <svg class="leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13C4 8 8 4 13 4c3 0 7 0 7 0s0 4 0 7a7 7 0 0 1-7 7z"/><path d="M8 16c3-1 6-4 8-8"/></svg>
+    <div>Загружаю аромапомощник…</div>
+  </div>
+</div>
+
+<script>
+/* ---- Telegram Mini App init ---- */
+(function(){
+  try{
+    var tg = window.Telegram && window.Telegram.WebApp;
+    if(tg){ tg.ready(); tg.expand();
+      // sync theme with Telegram
+      try{ if(tg.colorScheme==="dark") document.documentElement.setAttribute("data-theme","dark");
+           else if(tg.colorScheme==="light") document.documentElement.setAttribute("data-theme","light"); }catch(e){}
+    }
+  }catch(e){}
+})();
+
+/* ---- icons ---- */
+const LEAF_IC=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13C4 8 8 4 13 4c3 0 7 0 7 0s0 4 0 7a7 7 0 0 1-7 7z"/><path d="M8 16c3-1 6-4 8-8"/></svg>`;
+const SEARCH_IC=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>`;
+const AROMA_IC=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3c0 4-3 5-3 8a3 3 0 0 0 6 0c0-3-3-4-3-8z"/><path d="M6 20c2-1.2 10-1.2 12 0"/></svg>`;
+const DROP_IC=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 10.5a6 6 0 0 1-12 0C6 9.5 12 3 12 3z"/></svg>`;
+
+/* ---- state ---- */
+let DATA=null, byEmo={}, INDEX=[], OILMAP={}, OILS=[], OILINFO={}, SYN={}, RELATED={}, SEEDS=[];
+const $=s=>document.querySelector(s);
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function cap(s){s=String(s).trim();return s?s[0].toUpperCase()+s.slice(1):s;}
+function norm(s){return s.toLowerCase().replace(/ё/g,"е").replace(/\s+/g," ").trim();}
+function plural(n){n=n%100;if(n>=11&&n<=14)return "ях";const d=n%10;if(d===1)return "и";return "ях";}
+
+/* ---- load data ---- */
+function loadData(){
+  fetch("data.json?v="+Date.now(),{cache:"no-store"})
+    .then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+    .then(d=>{ DATA=d; init(d); render(); })
+    .catch(err=>{ showError(err); });
+}
+function showError(err){
+  $("#app").innerHTML=
+    '<div class="loader">'+LEAF_IC.replace("leaf",'')+
+    '<div style="font-family:\'Cormorant Garamond\',serif;font-size:24px;color:var(--ink)">Не получилось загрузить данные</div>'+
+    '<div style="max-width:300px">Проверь, что рядом с приложением лежит файл <b>data.json</b>, и попробуй ещё раз.</div>'+
+    '<button class="retry" onclick="location.reload()">Обновить</button></div>';
+}
+function init(d){
+  INDEX = d.emotions.map(x=> x.see? {emo:x.e,see:x.see,oils:[]} : {emo:x.e,oils:x.o||[],see:null});
+  byEmo={}; INDEX.forEach(e=>byEmo[e.emo.toLowerCase()]=e);
+  OILINFO = d.oils||{}; OILS=Object.keys(OILINFO).sort((a,b)=>a.localeCompare(b,"ru"));
+  OILMAP={}; INDEX.forEach(e=>{ if(e.see)return; e.oils.forEach(o=>{(OILMAP[o]=OILMAP[o]||new Set()).add(e.emo);}); });
+  SYN=d.synonyms||{}; RELATED=d.related||{}; SEEDS=d.seeds||[];
+}
+function resolve(e){ let s=0; while(e&&e.see&&s<4){ const t=byEmo[e.see.toLowerCase()]; if(!t)break; e=t; s++; } return e; }
+
+/* ---- render skeleton ---- */
+function render(){
+  const m=DATA.meta||{};
+  $("#app").innerHTML=`
+  <div class="wrap">
+    <header class="head">
+      <button class="theme-btn" id="themeBtn" aria-label="Сменить тему">◐</button>
+      ${LEAF_IC.replace('<svg','<svg class="leaf"')}
+      <h1>${esc(m.title||"Аромапомощь")}</h1>
+      <p>${esc(m.subtitle||"")}</p>
+    </header>
+    <div class="tabs" role="tablist">
+      <button class="tab" id="tab-feel" role="tab" aria-selected="true">Что я чувствую</button>
+      <button class="tab" id="tab-cat" role="tab" aria-selected="false">Каталог масел</button>
+    </div>
+    <section class="panel" id="p-feel" role="tabpanel">
+      <div class="search">${SEARCH_IC}
+        <input id="q" type="search" autocomplete="off" placeholder="напиши, что чувствуешь… напр. тревога" aria-label="Поиск по эмоции">
+      </div>
+      <div id="seeds"><div class="hint">Частые состояния</div><div class="chips" id="seedChips"></div></div>
+      <div class="results" id="results"></div>
+    </section>
+    <section class="panel hidden" id="p-cat" role="tabpanel">
+      <div class="catbar"><div class="search" style="flex:1">${SEARCH_IC}
+        <input id="qc" type="search" autocomplete="off" placeholder="найти масло…" aria-label="Поиск масла"></div></div>
+      <div class="count" id="catCount"></div>
+      <div class="catgrid" id="catGrid"></div>
+    </section>
+    <p class="disc"><b>Важно.</b> ${esc(m.disclaimer||"")} ${esc(m.source||"")}</p>
+    <div class="brand">со заботой · <b>натуральная жизнь</b></div>
+  </div>
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Карточка масла">
+    <div class="grab"></div><button class="sh-close" id="shClose" aria-label="Закрыть">✕</button>
+    <div id="sheetBody"></div>
+  </div>`;
+  wire();
+}
+
+function wire(){
+  const qEl=$("#q");
+  qEl.addEventListener("input",runSearch);
+  $("#qc").addEventListener("input",e=>buildCat(e.target.value));
+  $("#tab-feel").onclick=()=>switchTab("feel");
+  $("#tab-cat").onclick=()=>{ switchTab("cat"); if(!$("#catGrid").children.length) buildCat(); };
+  $("#scrim").onclick=closeSheet; $("#shClose").onclick=closeSheet;
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeSheet(); });
+  $("#themeBtn").onclick=()=>{
+    const cur=document.documentElement.getAttribute("data-theme");
+    const dark=window.matchMedia("(prefers-color-scheme:dark)").matches;
+    const isDark = cur? cur==="dark" : dark;
+    document.documentElement.setAttribute("data-theme", isDark?"light":"dark");
+  };
+  buildSeeds();
+}
+
+function buildSeeds(){
+  const wrap=$("#seedChips"); const qEl=$("#q");
+  SEEDS.forEach(s=>{ if(!byEmo[s.toLowerCase()])return;
+    const b=document.createElement("button"); b.className="seed"; b.textContent=s;
+    b.onclick=()=>{ qEl.value=s; runSearch(); qEl.focus(); }; wrap.appendChild(b); });
+}
+
+/* ---- search ---- */
+function sharedPrefix(a,b){let i=0;const n=Math.min(a.length,b.length);while(i<n&&a[i]===b[i])i++;return i;}
+function scoreEmo(emo,q){
+  const en=norm(emo); const words=en.split(/[ ,]+/).filter(Boolean); let best=0;
+  for(const w of words){
+    if(w.length<3) continue;
+    if(w===q) return 100;
+    if(q.length>=3 && (w.startsWith(q)||q.startsWith(w))) best=Math.max(best,80);
+    const sp=sharedPrefix(w,q);
+    if(sp>=4 && sp>=Math.min(w.length,q.length)-2) best=Math.max(best,45+sp);
+    else if(sp>=4) best=Math.max(best,30+sp);
+  }
+  if(en.includes(q)) best=Math.max(best,60);
+  return best;
+}
+function runSearch(){
+  const results=$("#results"), qEl=$("#q");
+  const raw=qEl.value.trim(); const q=norm(raw);
+  $("#seeds").style.display = raw? "none":"block";
+  results.innerHTML="";
+  if(!raw) return;
+  const scored=[]; const seen=new Set();
+  if(SYN[q]){ const t=byEmo[SYN[q].toLowerCase()]; if(t){scored.push({e:t,s:200}); seen.add(t.emo);} }
+  INDEX.forEach(e=>{ if(seen.has(e.emo))return; const s=scoreEmo(e.emo,q); if(s>0) scored.push({e,s}); });
+  scored.sort((a,b)=> b.s-a.s || a.e.emo.localeCompare(b.e.emo,"ru"));
+  const hits=scored.map(x=>x.e);
+  if(!hits.length){
+    results.innerHTML=`<div class="empty">Не нашла состояние «<b>${esc(raw)}</b>».<br>Попробуй другое слово — напр. «тревога», «злость», «нет сил».</div>`;
+    return;
+  }
+  const shown=hits.slice(0,40);
+  shown.forEach(h=>results.appendChild(buildEmoCard(h)));
+  const shownSet=new Set(shown.map(h=>h.emo));
+  const primary=shown[0]&&shown[0].emo;
+  const rel=(RELATED[primary]||[]).filter(x=>byEmo[x.toLowerCase()]&&!shownSet.has(x));
+  if(rel.length){
+    const d=document.createElement("div"); d.className="reldiv"; d.textContent="Похожие состояния — по смыслу";
+    results.appendChild(d);
+    rel.slice(0,6).forEach(x=>results.appendChild(buildEmoCard(byEmo[x.toLowerCase()])));
+  }
+}
+function buildEmoCard(h){
+  const e=resolve(h);
+  const card=document.createElement("div"); card.className="rcard";
+  let head=`<div class="emo">${esc(h.emo)}</div>`;
+  head += h.see? `<div class="lead">то же, что «${esc(h.see)}»</div>` : `<div class="lead">масла-помощники · нажми, чтобы открыть</div>`;
+  const oils=document.createElement("div"); oils.className="oils";
+  e.oils.forEach((o,idx)=>{
+    const info=OILINFO[o]||{}; const b=document.createElement("button");
+    b.className="oil"+(info.img?"":" noimg");
+    b.innerHTML=(info.img?`<img class="th" src="${info.img}" alt="" loading="lazy">`:`<span class="n">${idx+1}</span>`)+esc(o);
+    b.onclick=()=>openOil(o); oils.appendChild(b);
+  });
+  card.innerHTML=head; card.appendChild(oils); return card;
+}
+
+/* ---- catalog ---- */
+function buildCat(filter=""){
+  const g=$("#catGrid"); g.innerHTML=""; const q=norm(filter);
+  const list=OILS.filter(o=>!q||norm(o).includes(q)||norm((OILINFO[o]||{}).en||"").includes(q));
+  $("#catCount").textContent=`${list.length} масел и смесей`;
+  list.forEach(o=>{
+    const info=OILINFO[o]||{}; const b=document.createElement("button"); b.className="catitem";
+    const thumb=info.img?`<img class="cth" src="${info.img}" alt="" loading="lazy">`:`<span class="cph">${LEAF_IC}</span>`;
+    b.innerHTML=`${thumb}<div><div class="cn">${esc(o)}</div><div class="cc">${esc(info.en||"")}${info.blend?" · смесь":""}</div></div>`;
+    b.onclick=()=>openOil(o); g.appendChild(b);
+  });
+}
+
+/* ---- oil sheet ---- */
+function openOil(name){
+  const info=OILINFO[name]||{};
+  const emos=[...(OILMAP[name]||[])].sort((a,b)=>a.localeCompare(b,"ru"));
+  const en=info.en||""; const kind=info.blend?"Готовая смесь":"Эфирное масло";
+  const pic=info.img?`<img class="pic" src="${info.img}" alt="">`:`<span class="picph">${LEAF_IC}</span>`;
+  let html=`<div class="sh-hero">${pic}<div><div class="sh-key">${esc(kind)}</div><h2 class="sh-name">${esc(name)}</h2></div></div>`;
+  html+=`<p class="sh-sub">${en?esc(en)+" · ":""}помогает при ${emos.length} состояни${plural(emos.length)}</p>`;
+  html+=`<div class="block"><h3>Помогает, когда чувствуешь</h3><div>`;
+  emos.forEach(e=>{ html+=`<button class="tag" data-emo="${esc(e)}">${esc(e)}</button>`; });
+  html+=`</div></div>`;
+  const aroma=info.aroma||"Вдыхай прямо из флакона или разотри каплю в ладонях. Можно распылять в диффузоре.";
+  const topical=info.topical||"";
+  let topMain=topical, safety="";
+  const mi=topical.indexOf("ПРИМЕЧАНИЕ");
+  if(mi>=0){ topMain=topical.slice(0,mi).trim(); safety=topical.slice(mi+11).replace(/^:\s*/,"").trim(); }
+  html+=`<div class="block"><h3>Как применять</h3>
+    <div class="how"><div class="ic">${AROMA_IC}</div><div><b>Ароматически</b><span>${esc(cap(aroma))}</span></div></div>`;
+  html+= topMain
+    ? `<div class="how"><div class="ic">${DROP_IC}</div><div><b>На кожу</b><span>${esc(cap(topMain))}</span></div></div>`
+    : `<div class="how"><div class="ic">${DROP_IC}</div><div><b>На кожу</b><span>Это масло раскрывается через аромат — местно обычно не наносят.</span></div></div>`;
+  if(safety) html+=`<div class="note">⚠️ ${esc(cap(safety))}</div>`;
+  html+=`</div>`;
+  $("#sheetBody").innerHTML=html;
+  $("#sheet").querySelectorAll(".tag").forEach(t=>t.onclick=()=>{ closeSheet(); switchTab("feel"); $("#q").value=t.dataset.emo; runSearch(); });
+  $("#scrim").classList.add("on"); $("#sheet").classList.add("on"); $("#sheet").scrollTop=0; document.body.style.overflow="hidden";
+}
+function closeSheet(){ $("#scrim").classList.remove("on"); $("#sheet").classList.remove("on"); document.body.style.overflow=""; }
+
+/* ---- tabs ---- */
+function switchTab(which){
+  const feel=which==="feel";
+  $("#tab-feel").setAttribute("aria-selected",feel); $("#tab-cat").setAttribute("aria-selected",!feel);
+  $("#p-feel").classList.toggle("hidden",!feel); $("#p-cat").classList.toggle("hidden",feel);
+}
+
+loadData();
+</script>
+</body>
+</html>
